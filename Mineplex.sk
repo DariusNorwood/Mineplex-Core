@@ -28,7 +28,7 @@ options:
 
 #!  These are internal settings, it is not recomended that you mess with them as they WILL mess up the plugin!
 options:
-	MCRVER: 3.0
+	MCRVER: 3.1
 	MCRHOTFIX: 0
 	configver: shamu
 	playerdata: 3
