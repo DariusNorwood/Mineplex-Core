@@ -494,7 +494,7 @@ function setPlayerdata(p: offline player , f: text , v: text) :: boolean:
 		return true
 		playerdata({_p})
 	else if {mineplex.mode} is "sql":
-		if {_f} starts with "stats.":
+		if {_f} starts with "stats":
 			stop
 		update "UPDATE `accounts` SET `%{_f}%` = '%{_v}%' WHERE uuid = '%{_uuid}%'"
 		return true
@@ -986,8 +986,15 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 				send "&a"
 
 command /help [<string>]:
+	aliases: /pleasehelpmeiamgoingtoexplode, /?
 	trigger:
-		send "&9MCR> &7Please see &bhttps://github.com/WheezyGold7931/Mineplex-Core/wiki/Commands-and-Permissions &7for updated commands!"
+		send "&9Help> &7Hi there! Need some help?"
+		mcrjson("%player%", "&9> &7Check out ||&eour FAQ for commonly asked questions||ttp:&eClick to visit our FAQ page!||url:%{mineplex.config.website}%/faq")
+		mcrjson("%player%", "&9> &7Read ||&eour rules to avoid being punished!||ttp:&eClick to visit our rules page!||url:%{mineplex.config.website}%/rules")
+		mcrjson("%player%", "&9> &7Want to apply for Trainee? Visit ||&eapply.%{mineplex.config.website}%||ttp:&3Click to visit our forums to learn about Trainee!||url:apply.%{mineplex.config.website}%||&7!")
+		mcrjson("%player%", "&9> &7Question about a purchase? Contact support at ||&e%{mineplex.config.website}%/support||ttp:&eClick to visit our support page!||url:%{mineplex.config.website}%/support||&7!")
+		mcrjson("%player%", "&9> &7Find us on twitter at ||&b@%capitalize first char of each word in last element of  {mineplex.config.twitter} split at ""/""%||ttp:&bClick to visit our twitter!||url:%{mineplex.config.twitter}%")
+		mcrjson("%player%", "&9> &7Need help with MCR Commands? ||&eView the MCR Wiki for a list of commands||ttp:&eClick to visit the MCR wiki!||url:https://github.com/MPlexCore/Mineplex-Core/wiki/Commands-and-Permissions||&7!")
 
 command /recompile [<string>]:
 	aliases: /rec
