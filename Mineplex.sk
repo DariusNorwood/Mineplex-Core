@@ -4544,21 +4544,21 @@ command /disguise [<string>] [<string>]:
 				set player tab name to "%{mineplex.rank.%player%}%&e%player%"
 				updateRankAPI(player)
 			else:
-				send "&9Disguise> &7Command List:%nl%&4/disguise <player> &7Makes you appear as target player in chat and tab &4Admin"
+				send "&9Disguise> &7You are not disguised. You can disguise with /disguise <username>"
 		else:
 			if {mineplex.disguise.%player%} is set:
 				send "&9Disguise> &7You are already disguised. Please undisguise by using /disguise"
 			else:
 				set {_n} to the length of arg 1
 				if {_n} is greater than 16:
-					send "&9Disguise> &7That disguise name is not permitted!"
+					send "&9Disguise> &7The chosen name of &e%arg-1% &7is &e%{_n} - 16% &7characters too long!"
 					stop
 				if arg-1 contains "~" or "`" or "!" or "@" or "##" or "$" or "%%" or "^" or "&" or "*" or "(" or ")" or "-" or "=" or "+" or "[" or "]" or "{" or "}" or ":" or ";" or "," or "<" or ">" or "." or "?" or "/" or "\":
 					send "&9Disguise> &7That disguise name is not permitted!"
 					stop
 				set {_p1} to arg-1 parsed as offline player
 				if {_p1} is online:
-					send "&9Disguise> &7this name already in use!"
+					send "&9Disguise> &7This name already in use!"
 					stop
 				set {_ban} to getPlayerdata({_p1}, "banned")
 				set {_mute} to getPlayerdata({_p1}, "muted")
@@ -4566,9 +4566,10 @@ command /disguise [<string>] [<string>]:
 					send "&9Disguise> &7You may not disguise as people who are muted or banned."
 					stop
 				set {_rank} to getPlayerdata({_p1}, "rank")
-				if {_rank} is not "All" or "Ultra" or "Hero" or "Legend" or "Titan" or "Eternal":
-					send "&9Disguise> &7You may not disguise as users who are staff, youtubers, or twitchers."
-					stop
+				if {_rank} is set:
+					if {_rank} is not "" or "All" or "Ultra" or "Hero" or "Legend" or "Titan" or "Eternal":
+						send "&9Disguise> &7You may not disguise as users who are staff, youtubers, or twitchers."
+						stop
 				send "&9Disguise> &7Disguise Active: &f%arg-1%"
 				set {_localp} to arg 1 parsed as a player
 				rankLoad({_localp} , 2, 1)
@@ -5900,9 +5901,9 @@ command /report [<offline player>] [<text>]:
 				send "&9Report> &cYou cannot report yourself."
 				stop
 			open chest with 3 rows named "Report %arg-1%" to player
-			format slot 11 of player with iron sword named "&c&lHacking" with lore "&7X-ray, Forcefield, Speed, Fly etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Hacking", "%player's world%", arg-2)]
-			format slot 13 of player with book and quill named "&3&lChat Abuse" with lore "&7Verbal Abuse, Spam, Harassment, Trolling, etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Chat-Abuse", "%player's world%", arg-2)]
-			format slot 15 of player with ender pearl named "&fGameplay" with lore "&7Map and Bug Exploits" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Gameplay", "%player's world%", arg-2)]
+			format slot 11 of player with red dye named "&c&lHacking" with lore "&7X-ray, Forcefield, Speed, Fly etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Hacking", "%player's world%", arg-2)]
+			format slot 13 of player with yellow dye named "&e&lChat Abuse" with lore "&7Verbal Abuse, Spam, Harassment, Trolling, etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Chat-Abuse", "%player's world%", arg-2)]
+			format slot 15 of player with green dye named "&a&lGameplay" with lore "&7Map and Bug Exploits" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Gameplay", "%player's world%", arg-2)]
 		else:
 			send "&9Report> &cInvalid Usage: &e/report <player> <reason>"
 
