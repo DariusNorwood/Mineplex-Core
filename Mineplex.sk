@@ -801,7 +801,7 @@ function gwenAlert(p: player , r: text) :: number:
 #Config Loading
 
 on script unload:
-	broadcast "&9MCR> &7Mineplex Core is recompiling!"
+	broadcast "&9MCR> &7Mineplex Core is re-parsing!"
 
 on load:
 	if file "plugins/Mineplex-Core-Remake/config.yml" doesn't exists:
@@ -1004,12 +1004,12 @@ command /recompile [<string>]:
 	permission message: &9Permissions> &7You do not have permission to do that.
 	trigger:
 		if arg 1 is not set:
-			broadcast "&9MCR> &7Mineplex Core &e{@MCRVER} &7will be recompiling in two seconds."
+			broadcast "&9MCR> &7Mineplex Core &e{@MCRVER} &7will be re-parsing in two seconds."
 			wait 2 second
 			player command "/sk reload Mineplex"
 		else:
 			if arg 1 is "-s":
-				broadcast "&9MCR> &7Mineplex Core will be recompiling in two seconds. (Silent)"
+				broadcast "&9MCR> &7Mineplex Core will be re-parsing in two seconds. (Silent)"
 				execute console command "/sk reload Mineplex"
 
 #Thanks XeXRainnn
@@ -7145,7 +7145,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "user":
 			open chest with 6 rows named "User Preferences" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7204,7 +7204,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "game":
 			open chest with 6 rows named "Game Mechanic Preference" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7251,7 +7251,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "misc":
 			open chest with 6 rows named "Miscellaneous Preference" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7292,7 +7292,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "social":
 			open chest with 6 rows named "Social Preferences" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7351,7 +7351,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "staff":
 			open chest with 6 rows named "Exclusive Preferences" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
