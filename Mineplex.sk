@@ -551,6 +551,40 @@ function delGems(p: offline player , a: number) :: boolean:
 		remove {_a} from {_get}
 		setPlayerdata({_p}, "gems", "%{_get}%")
 
+function firework(l: location, t: string, r: integer, g: integer, b: integer, p: boolean) :: string:
+    if {_p} is true:
+        set {_p} to 1
+    else:
+        set {_p} to 20
+    if {_t} is not "BALL" or "LARGE BALL" or "BALL_LARGE" or "STAR" or "CREEPER" or "BURST":
+        message "&8[&3Firework&bAPI&8] &4Error: &c%{_t}% &7is not a valid firework type." to all players
+        stop
+    if {_r} or {_g} or {_b} > 255:
+        message "&8[&3Firework&bAPI&8] &4Error: &cUnallowed Value (>255)" to all players
+        stop
+    if {_t} is "BALL":
+        set {_t} to 0
+    else if {_t} is "LARGE BALL" or "BALL_LARGE":
+        set {_t} to 1
+    else if {_t} is "STAR":
+        set {_t} to 2
+    else if {_t} is "CREEPER":
+        set {_t} to 3
+    else if {_t} is "BURST":
+        set {_t} to 4
+    #RGB CONVERT
+    set {_c1} to convert num {_r} to hexa
+    set {_c2} to convert num {_g} to hexa
+    set {_c3} to convert num {_b} to hexa
+    loop 3 times:
+        set {_cL} to length of {_c%loop-value%}
+        if {_cL} < 2:
+            set {_c%loop-value%} to "0%{_c%loop-value%}%"
+    set {_color} to convert hexa "%{_c1}%%{_c2}%%{_c3}%" to num
+    spawn a firework at {_l}
+    add "{Silent:1b,FireworksItem:{id:fireworks,Count:1,tag:{Fireworks:{Explosions:[{Type:%{_t}%,Colors:[%{_color}%],FadeColors:[%{_color}%]}]}}}}" to nbt of spawned entity
+    add "{LifeTime:%{_p}%}" to nbt of spawned entity
+
 on quit:
 	delete {mineplex.rank.%player%}
 	delete {mineplex.level.%player%}
