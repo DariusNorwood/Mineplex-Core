@@ -15,16 +15,16 @@ script options:
 
 #!  If you want to use MySQL features edit the details below
 script options:
-    $ db url jdbc:mysql://localhost:3306/mpcore
-    $ db username root
-    $ db password password
+    $ db url jdbc:mysql://<HOST>:3306/<DATABASE>
+    $ db username <USERNAME>
+    $ db password <PASSWORD>
 
 
 #!  This value can be set to the following:
 #! "file": Stores the playerdata into files (Default)
 #! "sql": Stores the playerdata into a sql database (Details must be setup above)
 options:
-	mode: sql
+	mode: file
 
 #!  These are internal settings, it is not recomended that you mess with them as they WILL mess up the plugin!
 options:
@@ -494,7 +494,7 @@ function setPlayerdata(p: offline player , f: text , v: text) :: boolean:
 		return true
 		playerdata({_p})
 	else if {mineplex.mode} is "sql":
-		if {_f} starts with "stats.":
+		if {_f} starts with "stats":
 			stop
 		update "UPDATE `accounts` SET `%{_f}%` = '%{_v}%' WHERE uuid = '%{_uuid}%'"
 		return true
@@ -550,6 +550,40 @@ function delGems(p: offline player , a: number) :: boolean:
 		set {_get} to first element out of objects in column "gems" from result of query "SELECT gems FROM `accounts` WHERE uuid = '%{_uuid}%'"
 		remove {_a} from {_get}
 		setPlayerdata({_p}, "gems", "%{_get}%")
+
+function firework(l: location, t: string, r: integer, g: integer, b: integer, p: boolean) :: string:
+    if {_p} is true:
+        set {_p} to 1
+    else:
+        set {_p} to 20
+    if {_t} is not "BALL" or "LARGE BALL" or "BALL_LARGE" or "STAR" or "CREEPER" or "BURST":
+        message "&8[&3Firework&bAPI&8] &4Error: &c%{_t}% &7is not a valid firework type." to all players
+        stop
+    if {_r} or {_g} or {_b} > 255:
+        message "&8[&3Firework&bAPI&8] &4Error: &cUnallowed Value (>255)" to all players
+        stop
+    if {_t} is "BALL":
+        set {_t} to 0
+    else if {_t} is "LARGE BALL" or "BALL_LARGE":
+        set {_t} to 1
+    else if {_t} is "STAR":
+        set {_t} to 2
+    else if {_t} is "CREEPER":
+        set {_t} to 3
+    else if {_t} is "BURST":
+        set {_t} to 4
+    #RGB CONVERT
+    set {_c1} to convert num {_r} to hexa
+    set {_c2} to convert num {_g} to hexa
+    set {_c3} to convert num {_b} to hexa
+    loop 3 times:
+        set {_cL} to length of {_c%loop-value%}
+        if {_cL} < 2:
+            set {_c%loop-value%} to "0%{_c%loop-value%}%"
+    set {_color} to convert hexa "%{_c1}%%{_c2}%%{_c3}%" to num
+    spawn a firework at {_l}
+    add "{Silent:1b,FireworksItem:{id:fireworks,Count:1,tag:{Fireworks:{Explosions:[{Type:%{_t}%,Colors:[%{_color}%],FadeColors:[%{_color}%]}]}}}}" to nbt of spawned entity
+    add "{LifeTime:%{_p}%}" to nbt of spawned entity
 
 on quit:
 	delete {mineplex.rank.%player%}
@@ -697,6 +731,7 @@ function updateRankAPI(p: player) :: player:
 				set {_br} to "P.%{_br}%"
 		set {mineplex.api.displayrank.%{_p}%} to "%{_dr}% (%{_br}%)"
 		set {mineplex.api.displayname.%{_p}%} to "%{mineplex.disguise.%{_p}%}%"
+		set {mineplex.sb.anim.%{_p}%} to "              Welcome %{mineplex.api.displayname.%{_p}%}%, to the %{mineplex.config.servername}% Network!                    "
 	else:
 		set {_br} to uncolored {mineplex.rank.%{_p}%}
 		if {mineplex.rank.%{_p}%} is set:
@@ -724,6 +759,7 @@ function updateRankAPI(p: player) :: player:
 				set {_br} to "P.%{_br}%"
 		set {mineplex.api.displayrank.%{_p}%} to "%{_br}%"
 		set {mineplex.api.displayname.%{_p}%} to "%{_p}%"
+		set {mineplex.sb.anim.%{_p}%} to "              Welcome %{mineplex.api.displayname.%{_p}%}%, to the %{mineplex.config.servername}% Network!                    "
 
 function mcs(p: player , m: text) :: number:
 	if {mineplex.overridechat} is true:
@@ -799,7 +835,7 @@ function gwenAlert(p: player , r: text) :: number:
 #Config Loading
 
 on script unload:
-	broadcast "&9MCR> &7Mineplex Core is recompiling!"
+	broadcast "&9MCR> &7Mineplex Core is re-parsing!"
 
 on load:
 	if file "plugins/Mineplex-Core-Remake/config.yml" doesn't exists:
@@ -986,8 +1022,15 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 				send "&a"
 
 command /help [<string>]:
+	aliases: /pleasehelpmeiamgoingtoexplode, /?
 	trigger:
-		send "&9MCR> &7Please see &bhttps://github.com/WheezyGold7931/Mineplex-Core/wiki/Commands-and-Permissions &7for updated commands!"
+		send "&9Help> &7Hi there! Need some help?"
+		mcrjson("%player%", "&9> &7Check out ||&eour FAQ for commonly asked questions||ttp:&eClick to visit our FAQ page!||url:%{mineplex.config.website}%/faq")
+		mcrjson("%player%", "&9> &7Read ||&eour rules to avoid being punished!||ttp:&eClick to visit our rules page!||url:%{mineplex.config.website}%/rules")
+		mcrjson("%player%", "&9> &7Want to apply for Trainee? Visit ||&eapply.%{mineplex.config.website}%||ttp:&3Click to visit our forums to learn about Trainee!||url:apply.%{mineplex.config.website}%||&7!")
+		mcrjson("%player%", "&9> &7Question about a purchase? Contact support at ||&e%{mineplex.config.website}%/support||ttp:&eClick to visit our support page!||url:%{mineplex.config.website}%/support||&7!")
+		mcrjson("%player%", "&9> &7Find us on twitter at ||&b@%capitalize first char of each word in last element of  {mineplex.config.twitter} split at ""/""%||ttp:&bClick to visit our twitter!||url:%{mineplex.config.twitter}%")
+		mcrjson("%player%", "&9> &7Need help with MCR Commands? ||&eView the MCR Wiki for a list of commands||ttp:&eClick to visit the MCR wiki!||url:https://github.com/MPlexCore/Mineplex-Core/wiki/Commands-and-Permissions||&7!")
 
 command /recompile [<string>]:
 	aliases: /rec
@@ -995,12 +1038,12 @@ command /recompile [<string>]:
 	permission message: &9Permissions> &7You do not have permission to do that.
 	trigger:
 		if arg 1 is not set:
-			broadcast "&9MCR> &7Mineplex Core &e{@MCRVER} &7will be recompiling in two seconds."
+			broadcast "&9MCR> &7Mineplex Core &e{@MCRVER} &7will be re-parsing in two seconds."
 			wait 2 second
 			player command "/sk reload Mineplex"
 		else:
 			if arg 1 is "-s":
-				broadcast "&9MCR> &7Mineplex Core will be recompiling in two seconds. (Silent)"
+				broadcast "&9MCR> &7Mineplex Core will be re-parsing in two seconds. (Silent)"
 				execute console command "/sk reload Mineplex"
 
 #Thanks XeXRainnn
@@ -1068,8 +1111,8 @@ on join:
 	set {_player} to "%player%"
 	replace all "s" in {_player} with "sssss"
 	send "&2&lCarl the Creeper> &aHey %{_player}%! I have sssome amazing rewardsss for you! Come sssee me!"
-	if {spintickets.%player%} is not set:
-		set {spintickets.%player%} to 0
+	if {mineplex.tickets.%player%} is not set:
+		set {mineplex.tickets.%player%} to 0
 	if {mineplex.polltaken.0.%player%} is not set:
 		set {mineplex.polltaken.0.%player%} to true
 	if {mineplex.thankrewards.%player%} is not set:
@@ -1103,9 +1146,129 @@ command /thank [<offline player>]:
 		else:
 			send "&9Thank> &7Usage: &e/thank <player>"
 
+function carlSpinNew(p: player) :: text:
+	open chest with 3 rows named "&8Carl's Spinner" to {_p}
+	loop (random integer between 5 and 10) times:
+		add prismarine shard named "&bTreasure Shards" to {_roll::*}
+	loop (random integer between 5 and 22) times:
+		add emerald named "&fGems" to {_roll::*}
+	loop (random integer between 1 and 10) times:
+		add firework rocket named "&fFireworks" to {_roll::*}
+	loop (random integer between 1 and 10) times:
+		add ender pearl named "&fEthereal Pearls" to {_roll::*}
+	loop (random integer between 1 and 10) times:
+		add tripwire hook named "&fFlesh Hooks" to {_roll::*}
+	loop (random integer between 1 and 10) times:
+		add iron horse armor named "&fBat Blasters" to {_roll::*}
+	loop (random integer between 1 and 10) times:
+		add gold horse armor named "&fPaintball Guns" to {_roll::*}
+	add leather named "&dCow Morph" to {_roll::*}
+	add nether star named "&cTitan Rank" to {_roll::*}
+	set {_speedFinal} to 3
+	set {_Selector1} to 4
+	loop (random integer between 31 and 60) times:
+		if inventory name of {_p}'s current inventory is not "&8Carl's Spinner":
+			stop
+		set {_sel} to 21
+		loop {_sel} times:
+			set {_sel2} to {_sel} - 1
+			set {_item::%{_sel}%} to {_item::%{_sel2}%}
+			subtract 1 from {_sel}
+		set {_item::1} to a random element out of {_roll::*}
+		loop integers between 0 and inventory size of {_p}'s current inventory - 1:
+			if loop-number-2 is {_Selector1}:
+				set slot loop-number-2 of {_p}'s current inventory to hopper named " "
+			loop 9 times:
+				set slot 8 + loop-number-3 of {_p}'s current inventory to {_item::%loop-number-3%}
+				set slot loop-number-2 of {_p}'s current inventory to gray stained glass pane named " "
+				if "%{_item::%loop-number-3%}%" is "prismarine shard":
+					set slot 17 + loop-number-3 of {_p}'s current inventory to light blue stained glass pane named " "
+					set slot -1 + loop-number-3 of {_p}'s current inventory to light blue stained glass pane named " "
+				if "%{_item::%loop-number-3%}%" is "nether star":
+					set slot 17 + loop-number-3 of {_p}'s current inventory to red stained glass pane named " "
+					set slot -1 + loop-number-3 of {_p}'s current inventory to red stained glass pane named " "
+				if "%{_item::%loop-number-3%}%" is "leather":
+					set slot 17 + loop-number-3 of {_p}'s current inventory to magenta stained glass pane named " "
+					set slot -1 + loop-number-3 of {_p}'s current inventory to magenta stained glass pane named " "
+				set slot 4 of {_p}'s current inventory to hopper named " "
+		add 1 to {_sound}
+		if {_sound} > 3:
+			set {_sound} to 1
+		if {_sound} = 1:
+			play sound "NOTE_PLING" to {_p} with volume 1 and pitch 15
+		else if {_sound} = 2:
+			play sound "NOTE_PLING" to {_p} with volume 1 and pitch 15
+		else if {_sound} = 3:
+			play sound "NOTE_PLING" to {_p} with volume 1 and pitch 15
+		add 1 to {_speed}
+		if {_speed} is 5:
+			set {_speed} to 0
+			add 1 to {_speedFinal}
+		loop {_speedFinal} times:
+			wait a tick
+	set {_wonItem} to slot 13 of {_p}'s current inventory
+	set {_slotFill} to gray stained glass pane with name " "
+	if {_wonItem} is a emerald:
+		set {_add} to random integer between 5 and 20
+		addGems({_p}, {_add})
+		message "&9Carl's Spinner> &7You won &f%{_add}% Gems" to {_p}
+	if {_wonItem} is a ender pearl:
+		set {_add} to random integer between 5 and 20
+		add {_add} to {mineplex.cosmetics.pearls.%{_p}%}
+		message "&9Carl's Spinner> &7You won &f%{_add}% Ethereal Pearls" to {_p}
+	if {_wonItem} is a firework rocket:
+		set {_add} to random integer between 5 and 20
+		add {_add} to {mineplex.cosmetics.firework.%{_p}%}
+		message "&9Carl's Spinner> &7You won &f%{_add}% Fireworks" to {_p}
+	if {_wonItem} is a iron horse armor:
+		set {_add} to random integer between 5 and 20
+		add {_add} to {mineplex.cosmetics.blaster.%{_p}%}
+		message "&9Carl's Spinner> &7You won &f%{_add}% Bat Blasters" to {_p}
+	if {_wonItem} is a gold horse armor:
+		set {_add} to random integer between 5 and 20
+		add {_add} to {mineplex.cosmetics.paintball.%{_p}%}
+		message "&9Carl's Spinner> &7You won &f%{_add}% Paintball Guns" to {_p}
+	if {_wonItem} is a tripwire hook:
+		set {_add} to random integer between 5 and 20
+		add {_add} to {mineplex.cosmetics.hook.%{_p}%}
+		message "&9Carl's Spinner> &7You won &f%{_add}% Flesh Hooks" to {_p}
+	if {_wonItem} is a prismarine shard:
+		set {_add} to random integer between 5 and 20
+		addShards({_p}, {_add})
+		message "&9Carl's Spinner> &7You won &b%{_add}% Shards" to {_p}
+		set {_slotFill} to light blue stained glass pane with name " "
+	if {_wonItem} is leather:
+		message "&9Carl's Spinner> &7You won &dCow Morph" to {_p}
+		set {_slotFill} to magenta stained glass pane with name " "
+	if {_wonItem} is nether star:
+		message "&9Carl's Spinner> &7You won &cTitan Rank" to {_p}
+		set {_slotFill} to red stained glass pane with name " "
+		execute console command "/rank %{_p}% TITAN"
+	set {_slot} to 5
+	loop 5 times:
+		if inventory name of {_p}'s current inventory is not "&8Carl's Spinner":
+			stop
+		set slot 17 + {_slot} of {_p}'s current inventory to {_slotFill}
+		set slot -1 + {_slot} of {_p}'s current inventory to {_slotFill}
+		set slot 8 + {_slot} of {_p}'s current inventory to {_slotFill}
+		set slot 9 - {_slot} of {_p}'s current inventory to {_slotFill}
+		set slot 18 - {_slot} of {_p}'s current inventory to {_slotFill}
+		set slot 27 - {_slot} of {_p}'s current inventory to {_slotFill}
+		set slot 13 of {_p}'s current inventory to {_wonItem}
+		remove 1 from {_slot}
+		wait 1 second
+
+function reqSpin(p: player) :: text:
+	if {mineplex.tickets.%{_p}%} is bigger than 0:
+		wait 2 ticks
+		carlSpinNew({_p})
+		remove 1 from {mineplex.tickets.%{_p}%}
+	else:
+		message "&9Carl's Spinner> &7A Unknown Error has occured." to {_p}
+
 function carlSpin(p: player) :: number:
-	if {spintickets.%{_p}%} >= 1:
-		remove 1 from {spintickets.%{_p}%}
+	if {mineplex.tickets.%{_p}%} >= 1:
+		remove 1 from {mineplex.tickets.%{_p}%}
 		wait 5 ticks
 		open chest with 3 rows named "Carl's Spinner" to {_p}
 		set {opener.%{_p}%} to true
@@ -1248,6 +1411,11 @@ function claimThank(p: player) :: number:
 	add {_am} to {_cur}
 	setPlayerdata({_p}, "shards", "%{_cur}%")
 
+on inventory click:
+	if inventory name of player's current inventory is "Carl's Spinner":
+		cancel event
+		close player's inventory
+
 #Dank as all heck
 function carlGUI(p: player) :: number:
 	open chest with 6 rows named "%{_p}%'s Bonuses" to {_p}
@@ -1267,7 +1435,7 @@ function carlGUI(p: player) :: number:
 		format slot 12 of {_p} with redstone block named "&c&lDaily Reward" with lore "||&fNext reward in %{_finalwait}%!|| ||&7||&eRewards||  &f100 Treasure Shards||  &f100 Gems||  &f250 Experience||&7||&eCurrent Streak: &f0||&eStreak Bonus: &f0%%||&7||&eHighest Streak: &f0" to close
 	else:
 		format slot 12 of {_p} with chest named "&a&lDaily Reward" with lore "||&fClick to Claim!|| ||&7||&eRewards||  &f100 Treasure Shards||  &f100 Gems||  &f250 Experience||&7||&eCurrent Streak: 0||&eStreak Bonus: 5||&7||&eHighest Streak: &f1||&eStreak Reset: &f1.3 Days" to close then run [dailyr({_p})]
-	format slot 14 of {_p} with creeper head named "&c&lCarl's Spinner" with lore "||&fYou need a Carl Spin Ticket to Spin||&b||&eYour Tickets: &f%{spintickets.%{_p}%}%" to close then run [carlSpin({_p})]
+	format slot 14 of {_p} with creeper head named "&c&lCarl's Spinner" with lore "||&fYou need a Carl Spin Ticket to Spin||&b||&eYour Tickets: &f%{mineplex.tickets.%{_p}%}%" to close then run [reqSpin({_p})]
 	format slot 16 of {_p} with redstone block named "&c&lPower Play Club" with lore "&eFebruary's Cosmetic||  &fTrue Love Pet||&b &f||&eOther Rewards||  &f2 Game Amplifier||  &f1 Omega Chest||&b||&cGet Power Play Club months at||&b%{mineplex.config.shoplink}%" to close
 	format slot 20 of {_p} with water bucket named "&e&lVisit us on Facebook" with lore "||&eRewards||    &f10 Ancient Chest" to close
 	set {_t} to difference between {carl.ytr.%{_p}%} and now
@@ -1464,7 +1632,7 @@ command /ticket [<offline player>] [<string>] [<string>]:
 				if {_int} is an int:
 					send "&9Tickets> &7You gave &e%arg-2% &7Carl spin tickets to &e%arg-1%" to sender 
 					send "&9Tickets> &7You recieved &e%arg 2% &7Carl spin tickets" to arg 1
-					add {_int} to {spintickets.%arg-1%}
+					add {_int} to {mineplex.tickets.%arg-1%}
 				else:
 					send "&9Tickets> &7Listing Commands"
 					send "&4/ticket <player> <amount> &7Give a player spin tickets &4Admin"
@@ -3564,31 +3732,68 @@ on quit:
 	if {mineplex.inchest.%{_p}%} is set:
 		resetPoints({_p}, {mineplex.inchest.%{_p}%})
 		delete {mineplex.inchest.%{_p}%}
-#Scoreboard
 
-every 2 seconds:
+#Scoreboard
+function animSB(p: player) :: text:
+	while {_p} is online:
+		set {_l} to the length of {mineplex.sb.anim.%{_p}%}
+		remove 15 from {_l}
+		set {_char} to 0
+		loop {_l} times:
+			if {_p} is online:
+				wipe {_p}'s sidebar
+				set name of sidebar of {_p} to "&f&l%subtext of {mineplex.sb.anim.%{_p}%} from characters {_char} to ({_char} + 15)%"
+				set score "&b&lServer" in sidebar of {_p} to 15
+				set score "&f%{mineplex.config.world}%" in sidebar of {_p} to 14
+				set score "&1 " in sidebar of {_p} to 13
+				set score "&a&lGems" in sidebar of {_p} to 12
+				set score "&r%{mineplex.gems.%{_p}%}%" in sidebar of {_p} to 11
+				set score "&2 " in sidebar of {_p} to 10
+				set score "&e&lShards" in sidebar of {_p} to 9
+				set score "&f%{mineplex.shards.%{_p}%}%" in sidebar of {_p} to 8
+				set score "&3 " in sidebar of {_p} to 7
+				set score "&6&lRank" in sidebar of {_p} to 6
+				set score "&f%{mineplex.api.displayrank.%{_p}%}%" in sidebar of {_p} to 5
+				set score "&4 " in sidebar of {_p} to 4
+				set score "&c&lWebsite" in sidebar of {_p} to 3
+				set score "&f%{mineplex.config.website}%" in sidebar of {_p} to 2
+				set score "&f----------------" in sidebar of {_p} to 1
+				set {mineplex.sbdisplay.name.%{_p}%} to "&f&l%subtext of {mineplex.sb.anim.%{_p}%} from characters {_char} to ({_char} + 15)%"
+				add 1 to {_char}
+				wait 3 ticks
+			else:
+				stop
+
+
+on join:
 	if {mineplex.usescoreboard} is false:
 		stop
-	else:
-		loop all players:
-			wipe loop-player's sidebar
-			set {_fc} to convert string {mineplex.config.servername} to uppercase
-			set name of sidebar of loop-player to "&6&l%{_fc}%"
-			set score "&b&lServer" in sidebar of loop-player to 15
-			set score "&f%{mineplex.config.world}%" in sidebar of loop-player to 14
-			set score "&1 " in sidebar of loop-player to 13
-			set score "&a&lGems" in sidebar of loop-player to 12
-			set score "&r%{mineplex.gems.%loop-player%}%" in sidebar of loop-player to 11
-			set score "&2 " in sidebar of loop-player to 10
-			set score "&e&lShards" in sidebar of loop-player to 9
-			set score "&f%{mineplex.shards.%loop-player%}%" in sidebar of loop-player to 8
-			set score "&3 " in sidebar of loop-player to 7
-			set score "&6&lRank" in sidebar of loop-player to 6
-			set score "&f%{mineplex.api.displayrank.%loop-player%}%" in sidebar of loop-player to 5
-			set score "&4 " in sidebar of loop-player to 4
-			set score "&c&lWebsite" in sidebar of loop-player to 3
-			set score "&f%{mineplex.config.website}%" in sidebar of loop-player to 2
-			set score "&f----------------" in sidebar of loop-player to 1
+	set {mineplex.sb.anim.%player%} to "              Welcome %player%, to the %{mineplex.config.servername}% Network!                    "
+	animSB(player)
+
+#every 2 seconds:
+	#if {mineplex.usescoreboard} is false:
+		#stop
+	#else:
+		#loop all players:
+			#wipe loop-player's sidebar
+			#set {_fc} to convert string {mineplex.config.servername} to uppercase
+			#set name of sidebar of loop-player to ""
+			#set score "&b&lServer" in sidebar of loop-player to 15
+			#set score "&f%{mineplex.config.world}%" in sidebar of loop-player to 14
+			#set score "&1 " in sidebar of loop-player to 13
+			#set score "&a&lGems" in sidebar of loop-player to 12
+			#set score "&r%{mineplex.gems.%loop-player%}%" in sidebar of loop-player to 11
+			#set score "&2 " in sidebar of loop-player to 10
+			#set score "&e&lShards" in sidebar of loop-player to 9
+			#set score "&f%{mineplex.shards.%loop-player%}%" in sidebar of loop-player to 8
+			#set score "&3 " in sidebar of loop-player to 7
+			#set score "&6&lRank" in sidebar of loop-player to 6
+			#set score "&f%{mineplex.api.displayrank.%loop-player%}%" in sidebar of loop-player to 5
+			#set score "&4 " in sidebar of loop-player to 4
+			#set score "&c&lWebsite" in sidebar of loop-player to 3
+			#set score "&f%{mineplex.config.website}%" in sidebar of loop-player to 2
+			#set score "&f----------------" in sidebar of loop-player to 1
 
 #Rank Loader
 
@@ -4537,21 +4742,21 @@ command /disguise [<string>] [<string>]:
 				set player tab name to "%{mineplex.rank.%player%}%&e%player%"
 				updateRankAPI(player)
 			else:
-				send "&9Disguise> &7Command List:%nl%&4/disguise <player> &7Makes you appear as target player in chat and tab &4Admin"
+				send "&9Disguise> &7You are not disguised. You can disguise with /disguise <username>"
 		else:
 			if {mineplex.disguise.%player%} is set:
 				send "&9Disguise> &7You are already disguised. Please undisguise by using /disguise"
 			else:
 				set {_n} to the length of arg 1
 				if {_n} is greater than 16:
-					send "&9Disguise> &7That disguise name is not permitted!"
+					send "&9Disguise> &7The chosen name of &e%arg-1% &7is &e%{_n} - 16% &7characters too long!"
 					stop
 				if arg-1 contains "~" or "`" or "!" or "@" or "##" or "$" or "%%" or "^" or "&" or "*" or "(" or ")" or "-" or "=" or "+" or "[" or "]" or "{" or "}" or ":" or ";" or "," or "<" or ">" or "." or "?" or "/" or "\":
 					send "&9Disguise> &7That disguise name is not permitted!"
 					stop
 				set {_p1} to arg-1 parsed as offline player
 				if {_p1} is online:
-					send "&9Disguise> &7this name already in use!"
+					send "&9Disguise> &7This name already in use!"
 					stop
 				set {_ban} to getPlayerdata({_p1}, "banned")
 				set {_mute} to getPlayerdata({_p1}, "muted")
@@ -4559,9 +4764,10 @@ command /disguise [<string>] [<string>]:
 					send "&9Disguise> &7You may not disguise as people who are muted or banned."
 					stop
 				set {_rank} to getPlayerdata({_p1}, "rank")
-				if {_rank} is not "All" or "Ultra" or "Hero" or "Legend" or "Titan" or "Eternal":
-					send "&9Disguise> &7You may not disguise as users who are staff, youtubers, or twitchers."
-					stop
+				if {_rank} is set: #Not in the database
+					if {_rank} is not "" or "All" or "Ultra" or "Hero" or "Legend" or "Titan" or "Eternal":
+						send "&9Disguise> &7You may not disguise as users who are staff, youtubers, or twitchers."
+						stop
 				send "&9Disguise> &7Disguise Active: &f%arg-1%"
 				set {_localp} to arg 1 parsed as a player
 				rankLoad({_localp} , 2, 1)
@@ -4857,9 +5063,9 @@ command /mcr:
 		send "&9Plugin> &7Mineplex Core"
 		send "&9Plugin> &7Running MCR: &e{@MCRVER}"
 		send "&9Plugin> &7Hotfix/Release Cycle: &e{@MCRHOTFIX}"
-		send "&9Plugin> &7by &aWheezyGold7931&7, &eTheSkripterDK&7, &eTorksi&7, &7and &eItzRenderman"
-		send "&9Plugin> &7Special thanks to TonyMaster21, LimeGlass, Rezz, Citrin_, Boobah, SomethingPlayzMC, Ottelino, and SoftBreeze"
-		send "&9Plugin> &7Also, special ﻿thanks to our moderation team."
+		send "&9Plugin> &7by &aWheezyGold7931&7, &eOttelino&7, &eTheSkripterDK&7, &eTorksi&7, &7and &eItzRenderman"
+		send "&9Plugin> &7GitHub Contributors: NaiculS, termanator1128, IsGeorgeCurious, Techno3600, TreyRuffy, and WilliePlaysMC."
+		send "&9Plugin> &7Special thanks to SoftBreeze, Rezz, Boobah, TonyMaster21, LimeGlass, and Citrin_"
 		send ""
 		send "&9Patreon> &7Huge Thanks to my Patreons:"
 		send "&9Patreon> &eNone, anymore"
@@ -5205,30 +5411,31 @@ command /rank [<string>] [<offline player>] [<string>]:
 				send "&f/rank set (player) (rank): &eupdates chosen player's rank to the chosen rank"
 				send ""
 				send "&9Rank Update> &7Listing Rank List:"
-				send "&9Ranks> &7ALL"
-				send "&9Ranks> &7ULTRA"
-				send "&9Ranks> &7HERO"
-				send "&9Ranks> &7LEGEND"
-				send "&9Ranks> &7TITAN"
-				send "&9Ranks> &7ETERNAL"
-				send "&9Ranks> &7TRAINEE"
-				send "&9Ranks> &7MODERATOR"
-				send "&9Ranks> &7SNR_MODERATOR"
-				send "&9Ranks> &7CLANS_MOD"
-				send "&9Ranks> &7JNR_DEV"
-				send "&9Ranks> &7SUPPORT"
-				send "&9Ranks> &7ADMIN"
-				send "&9Ranks> &7LEADER"
-				send "&9Ranks> &7DEVELOPER"
-				send "&9Ranks> &7OWNER"
-				send "&9Ranks> &7ARTIST"
-				send "&9Ranks> &7MAPLEAD"
-				send "&9Ranks> &7BUILDER"
-				send "&9Ranks> &7MAPPER"
-				send "&9Ranks> &7EVENT"
-				send "&9Ranks> &7TWITCH"
-				send "&9Ranks> &7YOUTUBE"
-				send "&9Ranks> &7YT"
+				send "&9Ranks> &7ALL, ULTRA, HERO, LEGEND, TITAN, ETERNAL, TRAINEE, MODERATOR, SNR_MODERATOR, CLANS_MOD, JNR_DEV, SUPPORT, ADMIN, LEADER, DEVELOPER, OWNER, ARTIST, MAPLEAD, BUILDER, MAPPER, EVENT, TWITCH, YOUTUBE, YT."
+				#send "&9Ranks> &7ULTRA"
+				#send "&9Ranks> &7HERO"
+				#send "&9Ranks> &7LEGEND"
+				#send "&9Ranks> &7TITAN"
+				#send "&9Ranks> &7ETERNAL"
+				#send "&9Ranks> &7TRAINEE"
+				#send "&9Ranks> &7MODERATOR"
+				#send "&9Ranks> &7SNR_MODERATOR"
+				#send "&9Ranks> &7CLANS_MOD"
+				#send "&9Ranks> &7JNR_DEV"
+				#send "&9Ranks> &7SUPPORT"
+				#send "&9Ranks> &7ADMIN"
+				#send "&9Ranks> &7LEADER"
+				#send "&9Ranks> &7DEVELOPER"
+				#send "&9Ranks> &7OWNER"
+				#send "&9Ranks> &7ARTIST"
+				#send "&9Ranks> &7MAPLEAD"
+				#send "&9Ranks> &7BUILDER"
+				#send "&9Ranks> &7MAPPER"
+				#send "&9Ranks> &7EVENT"
+				#send "&9Ranks> &7TWITCH"
+				#send "&9Ranks> &7YOUTUBE"
+				#send "&9Ranks> &7YT"
+				stop
 			set {_uuid} to uuid of arg-2
 			set {_allcap} to convert arg-3 to all caps
 			if argument 3 is "ALL":
@@ -5893,9 +6100,9 @@ command /report [<offline player>] [<text>]:
 				send "&9Report> &cYou cannot report yourself."
 				stop
 			open chest with 3 rows named "Report %arg-1%" to player
-			format slot 11 of player with iron sword named "&c&lHacking" with lore "&7X-ray, Forcefield, Speed, Fly etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Hacking", "%player's world%", arg-2)]
-			format slot 13 of player with book and quill named "&3&lChat Abuse" with lore "&7Verbal Abuse, Spam, Harassment, Trolling, etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Chat-Abuse", "%player's world%", arg-2)]
-			format slot 15 of player with ender pearl named "&fGameplay" with lore "&7Map and Bug Exploits" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Gameplay", "%player's world%", arg-2)]
+			format slot 11 of player with red dye named "&c&lHacking" with lore "&7X-ray, Forcefield, Speed, Fly etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Hacking", "%player's world%", arg-2)]
+			format slot 13 of player with yellow dye named "&e&lChat Abuse" with lore "&7Verbal Abuse, Spam, Harassment, Trolling, etc" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Chat-Abuse", "%player's world%", arg-2)]
+			format slot 15 of player with green dye named "&a&lGameplay" with lore "&7Map and Bug Exploits" to close then run [send "&9Report ##%{mineplex.report.id}%> &aSuccessfully created report." to player]->[rawreport(arg-1, player, "Gameplay", "%player's world%", arg-2)]
 		else:
 			send "&9Report> &cInvalid Usage: &e/report <player> <reason>"
 
@@ -6988,7 +7195,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "user":
 			open chest with 6 rows named "User Preferences" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7047,7 +7254,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "game":
 			open chest with 6 rows named "Game Mechanic Preference" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7094,7 +7301,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "misc":
 			open chest with 6 rows named "Miscellaneous Preference" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7135,7 +7342,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "social":
 			open chest with 6 rows named "Social Preferences" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
@@ -7194,7 +7401,7 @@ function profile_system(arg1: text , arg2: text , p: player, p2: player) :: numb
 		if {_arg2} is "staff":
 			open chest with 6 rows named "Exclusive Preferences" to {_p}
 			wait 3 tick
-			format slot 0 of {_p} with bed item named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
+			format slot 0 of {_p} with bed named "&7← Go Back" to run [profile_system("menu", "prefs", {_p}, {_p2})]
 			format slot 1 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 2 of {_p} with light blue stained glass pane named "&f" to be unstealable
 			format slot 3 of {_p} with light blue stained glass pane named "&f" to be unstealable
