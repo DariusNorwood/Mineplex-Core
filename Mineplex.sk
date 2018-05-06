@@ -3735,18 +3735,34 @@ on quit:
 
 #Scoreboard
 function animSB(p: player) :: text:
-    while {_p} is online:
-        set {_l} to the length of {mineplex.sb.anim.%{_p}%}
-        remove 15 from {_l}
-        set {_char} to 0
-        loop {_l} times:
-            if {_p} is online:
-                set name of sidebar of {_p} to "&f&l%subtext of {mineplex.sb.anim.%{_p}%} from characters {_char} to ({_char} + 15)%"
-                set {mineplex.sbdisplay.name.%{_p}%} to "&f&l%subtext of {mineplex.sb.anim.%{_p}%} from characters {_char} to ({_char} + 15)%"
-                add 1 to {_char}
-                wait 3 ticks
-            else:
-                stop
+	while {_p} is online:
+		set {_l} to the length of {mineplex.sb.anim.%{_p}%}
+		remove 15 from {_l}
+		set {_char} to 0
+		loop {_l} times:
+			if {_p} is online:
+				wipe {_p}'s sidebar
+				set name of sidebar of {_p} to "&f&l%subtext of {mineplex.sb.anim.%{_p}%} from characters {_char} to ({_char} + 15)%"
+				set score "&b&lServer" in sidebar of {_p} to 15
+				set score "&f%{mineplex.config.world}%" in sidebar of {_p} to 14
+				set score "&1 " in sidebar of {_p} to 13
+				set score "&a&lGems" in sidebar of {_p} to 12
+				set score "&r%{mineplex.gems.%{_p}%}%" in sidebar of {_p} to 11
+				set score "&2 " in sidebar of {_p} to 10
+				set score "&e&lShards" in sidebar of {_p} to 9
+				set score "&f%{mineplex.shards.%{_p}%}%" in sidebar of {_p} to 8
+				set score "&3 " in sidebar of {_p} to 7
+				set score "&6&lRank" in sidebar of {_p} to 6
+				set score "&f%{mineplex.api.displayrank.%{_p}%}%" in sidebar of {_p} to 5
+				set score "&4 " in sidebar of {_p} to 4
+				set score "&c&lWebsite" in sidebar of {_p} to 3
+				set score "&f%{mineplex.config.website}%" in sidebar of {_p} to 2
+				set score "&f----------------" in sidebar of {_p} to 1
+				set {mineplex.sbdisplay.name.%{_p}%} to "&f&l%subtext of {mineplex.sb.anim.%{_p}%} from characters {_char} to ({_char} + 15)%"
+				add 1 to {_char}
+				wait 3 ticks
+			else:
+				stop
 
 
 on join:
@@ -3755,29 +3771,29 @@ on join:
 	set {mineplex.sb.anim.%player%} to "              Welcome %player%, to the %{mineplex.config.servername}% Network!                    "
 	animSB(player)
 
-every 2 seconds:
-	if {mineplex.usescoreboard} is false:
-		stop
-	else:
-		loop all players:
-			wipe loop-player's sidebar
+#every 2 seconds:
+	#if {mineplex.usescoreboard} is false:
+		#stop
+	#else:
+		#loop all players:
+			#wipe loop-player's sidebar
 			#set {_fc} to convert string {mineplex.config.servername} to uppercase
-			set name of sidebar of loop-player to ""
-			set score "&b&lServer" in sidebar of loop-player to 15
-			set score "&f%{mineplex.config.world}%" in sidebar of loop-player to 14
-			set score "&1 " in sidebar of loop-player to 13
-			set score "&a&lGems" in sidebar of loop-player to 12
-			set score "&r%{mineplex.gems.%loop-player%}%" in sidebar of loop-player to 11
-			set score "&2 " in sidebar of loop-player to 10
-			set score "&e&lShards" in sidebar of loop-player to 9
-			set score "&f%{mineplex.shards.%loop-player%}%" in sidebar of loop-player to 8
-			set score "&3 " in sidebar of loop-player to 7
-			set score "&6&lRank" in sidebar of loop-player to 6
-			set score "&f%{mineplex.api.displayrank.%loop-player%}%" in sidebar of loop-player to 5
-			set score "&4 " in sidebar of loop-player to 4
-			set score "&c&lWebsite" in sidebar of loop-player to 3
-			set score "&f%{mineplex.config.website}%" in sidebar of loop-player to 2
-			set score "&f----------------" in sidebar of loop-player to 1
+			#set name of sidebar of loop-player to ""
+			#set score "&b&lServer" in sidebar of loop-player to 15
+			#set score "&f%{mineplex.config.world}%" in sidebar of loop-player to 14
+			#set score "&1 " in sidebar of loop-player to 13
+			#set score "&a&lGems" in sidebar of loop-player to 12
+			#set score "&r%{mineplex.gems.%loop-player%}%" in sidebar of loop-player to 11
+			#set score "&2 " in sidebar of loop-player to 10
+			#set score "&e&lShards" in sidebar of loop-player to 9
+			#set score "&f%{mineplex.shards.%loop-player%}%" in sidebar of loop-player to 8
+			#set score "&3 " in sidebar of loop-player to 7
+			#set score "&6&lRank" in sidebar of loop-player to 6
+			#set score "&f%{mineplex.api.displayrank.%loop-player%}%" in sidebar of loop-player to 5
+			#set score "&4 " in sidebar of loop-player to 4
+			#set score "&c&lWebsite" in sidebar of loop-player to 3
+			#set score "&f%{mineplex.config.website}%" in sidebar of loop-player to 2
+			#set score "&f----------------" in sidebar of loop-player to 1
 
 #Rank Loader
 
