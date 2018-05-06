@@ -15,16 +15,16 @@ script options:
 
 #!  If you want to use MySQL features edit the details below
 script options:
-    $ db url jdbc:mysql://localhost:3306/mpcore
-    $ db username root
-    $ db password password
+    $ db url jdbc:mysql://<HOST>:3306/<DATABASE>
+    $ db username <USERNAME>
+    $ db password <PASSWORD>
 
 
 #!  This value can be set to the following:
 #! "file": Stores the playerdata into files (Default)
 #! "sql": Stores the playerdata into a sql database (Details must be setup above)
 options:
-	mode: sql
+	mode: file
 
 #!  These are internal settings, it is not recomended that you mess with them as they WILL mess up the plugin!
 options:
