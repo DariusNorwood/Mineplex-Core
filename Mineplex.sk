@@ -4053,29 +4053,6 @@ command /disguise [<string>] [<string>]:
 				set player tab name to "%{mineplex.rank.%{_player}%}%&e%arg-1%"
 				updateRankAPI(player)
 
-command /api [<string>] [<string>] [<string>]:
-	trigger:
-		if arg 1 is not set:
-			send "&9API> &7Mineplex Core API"
-			send "&9API> &7/api (api name)"
-			send "&9API> &7Current API's; &adisplayrank&7, &adisplayname"
-			send "&9API> &7Use /api (api name) (player) to view a different players's api output"
-		else:
-			if arg 2 is set:
-				set {_p} to arg-2
-			else:
-				set {_p} to "%player%"
-			if arg 1 is "displayrank":
-				if {mineplex.api.displayrank.%{_p}%} is not set:
-					set {mineplex.api.displayrank.%{_p}%} to "null"
-				send "&9API> &7Raw API Output; &f%{mineplex.api.displayrank.%{_p}%}%"
-			else if arg 1 is "displayname":
-				if {mineplex.api.displayname.%{_p}%} is not set:
-					set {mineplex.api.displayname.%{_p}%} to "null"
-				send "&9API> &7Raw API Output; &f%{mineplex.api.displayname.%{_p}%}%"
-			else:
-				send "&9API> &7Invalid API!"
-
 command /give [<string>] [<string>] [<string>] [<string>] [<string>]:
 	aliases: /g, /item, /i
 	permission: mineplex.admin
