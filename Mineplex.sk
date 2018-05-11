@@ -28,7 +28,7 @@ options:
 
 #!  These are internal settings, it is not recomended that you mess with them as they WILL mess up the plugin!
 options:
-	MCRVER: 3.1
+	MCRVER: 3.2
 	MCRHOTFIX: 0
 	configver: shamu
 	playerdata: 3
@@ -261,12 +261,29 @@ on load:
 		update "CREATE TABLE IF NOT EXISTS `accounts` ( `id` INT NULL DEFAULT NULL AUTO_INCREMENT , `name` VARCHAR(40) NOT NULL , `uuid` VARCHAR(100) NOT NULL , `rank` VARCHAR(20) NOT NULL DEFAULT 'All' , `level` INT(20) NOT NULL DEFAULT '0' , `gems` INT(20) NOT NULL DEFAULT '0' , `shards` INT(20) NOT NULL DEFAULT '0' , `banned` VARCHAR(20) NOT NULL DEFAULT 'no' , `muted` VARCHAR(20) NOT NULL DEFAULT 'no' , UNIQUE (`id`)) ENGINE = InnoDB;"
 		update "CREATE TABLE IF NOT EXISTS `newslist` ( `id` INT(11) NOT NULL AUTO_INCREMENT , `newsString` VARCHAR(256) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL , `newsPosition` VARCHAR(11) NULL DEFAULT NULL , UNIQUE (`id`)) ENGINE = InnoDB;"
 
+function dropPerms(p: player) :: boolean:
+	remove "mineplex.trainee" from {_p}'s permissions
+	remove "mineplex.legend" from {_p}'s permissions
+	remove "mineplex.titan" from {_p}'s permissions
+	remove "mineplex.mod" from {_p}'s permissions
+	remove "mineplex.srmod" from {_p}'s permissions
+	remove "mineplex.admin" from {_p}'s permissions
+	remove "mineplex.support" from {_p}'s permissions
+	remove "mineplex.leader" from {_p}'s permissions
+	remove "mineplex.owner" from {_p}'s permissions
+	remove "mineplex.jrdev" from {_p}'s permissions
+	remove "mineplex.2fa" from {_p}'s permissions
+	remove "mineplex.dev" from {_p}'s permissions
+	remove "mineplex.twitch" from {_p}'s permissions
+	remove "mineplex.youtube" from {_p}'s permissions
+	remove "mineplex.builder" from {_p}'s permissions
+
 function parseRank(p: player , r: text) :: string:
 	set {_uuid} to uuid of {_p}
 	if {mineplex.mode} is "file":
 		set {_get} to value "rank" get of "plugins/Mineplex-Core-Remake/playerdata/%{_uuid}%.yml"
 	if {mineplex.mode} is "sql":
-		set {_get} to first element out of objects in column "rank" from result of query "SELECT rank FROM `accounts` WHERE uuid = '%uuid of {_p}%'"
+		set {_get} to the first element out of objects in column "rank" from result of query "SELECT rank FROM `accounts` WHERE uuid = '%uuid of {_p}%'"
 	if {_get} is "All":
 		set {mineplex.rank.%{_p}%} to ""
 		return "&fPlayer"
@@ -973,11 +990,12 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 				if arg-2 is set:
 					set {mineplex.rank.%arg-2%} to "&4&lADMIN "
 					set {_mineplex.setadmin.temp} to arg-2 parsed as player
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms({_mineplex.setadmin.temp})
 					add "mineplex.trainee" to {_mineplex.setadmin.temp}'s permissions
 					add "mineplex.mod" to {_mineplex.setadmin.temp}'s permissions
 					add "mineplex.srmod" to {_mineplex.setadmin.temp}'s permissions
 					add "mineplex.admin" to {_mineplex.setadmin.temp}'s permissions
+					add "mineplex.support" to {_mineplex.setadmin.temp}'s permissions
 					add "mineplex.legend" to {_mineplex.setadmin.temp}'s permissions
 					add "mineplex.builder" to {_mineplex.setadmin.temp}'s permissions
 					updateRankAPI({_mineplex.setadmin.temp})
@@ -4689,7 +4707,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to ""
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to None!"
 					send "&9Client Manager> &7Your rank has been updated to None!" to arg 2
 					set arg-2 tab name to "&e%arg-2%"
@@ -4701,7 +4719,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&b&lULTRA "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to Ultra!"
 					send "&9Client Manager> &7Your rank has been updated to Ultra!" to arg 2
 					set arg-2 tab name to "&b&lULTRA &e%arg-2%"
@@ -4713,7 +4731,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&d&lHERO "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to Hero!"
 					send "&9Client Manager> &7Your rank has been updated to Hero!" to arg 2
 					set arg-2 tab name to "&d&lHERO &e%arg-2%"
@@ -4725,7 +4743,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&a&lLEGEND "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.legend" to arg-2's permissions
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to Legend!"
 					send "&9Client Manager> &7Your rank has been updated to Legend!" to arg 2
@@ -4738,7 +4756,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&c&lTITAN "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to Titan!"
@@ -4752,7 +4770,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&3&lETERNAL "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to Eternal!"
@@ -4766,7 +4784,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&6&lTRAINEE "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
@@ -4782,7 +4800,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&6&lMOD "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
@@ -4799,7 +4817,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&6&lSR.MOD "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.srmod" to arg-2's permissions
@@ -4818,7 +4836,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&6&lC.MOD "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.srmod" to arg-2's permissions
@@ -4836,7 +4854,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&4&lADMIN "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
@@ -4859,7 +4877,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&9&lAPEX "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
@@ -4882,7 +4900,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&4&lLEADER "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.jrdev" to arg-2's permissions
@@ -4906,7 +4924,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&4&lOWNER "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.srmod" to arg-2's permissions
@@ -4933,7 +4951,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&9&lBUILDER "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.titan" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.2fa" to arg-2's permissions
@@ -4948,7 +4966,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&9&lMAPPER "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.builder" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
@@ -4964,7 +4982,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&9&lSUPPORT "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.jrdev" to arg-2's permissions
@@ -4986,7 +5004,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&9&lARTIST "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
 					send "&9Client Manager> &7%arg-2%'s rank has been updated to Artist!"
@@ -5000,7 +5018,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&9&lMAPLEAD "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.builder" to arg-2's permissions
 					add "mineplex.2fa" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
@@ -5016,7 +5034,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&6&lJR.DEV "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.srmod" to arg-2's permissions
@@ -5036,7 +5054,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&4&lDEV "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.trainee" to arg-2's permissions
 					add "mineplex.mod" to arg-2's permissions
 					add "mineplex.srmod" to arg-2's permissions
@@ -5063,7 +5081,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&5&lTWITCH "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.twitch" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
@@ -5079,7 +5097,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&c&lYOUTUBE "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.youtube" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
@@ -5094,7 +5112,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&f&lEVENT "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.youtube" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
@@ -5109,7 +5127,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 				set {_c} to caseSensitive(arg-3, "%{_allcap}%")
 				if {_c} is  true:
 					set {mineplex.rank.%arg-2%} to "&5&lYT "
-					execute console command "/__mp__dp__ %arg-2%"
+					dropPerms(arg-2)
 					add "mineplex.youtube" to arg-2's permissions
 					add "mineplex.legend" to arg-2's permissions
 					add "mineplex.titan" to arg-2's permissions
@@ -5132,7 +5150,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 						if arg 3 is "ULTRA":
 							set {mineplex.testrank.%arg-2%} to {mineplex.rank.%arg-2%}
 							set {mineplex.rank.%arg-2%} to "&b&lULTRA "
-							execute console command "/__mp__dp__ %arg-2%"
+							dropPerms(arg-2)
 							set {_or} to uncolored {mineplex.testrank.%arg-2%}
 							send "&9Client Manager> &7%arg-2%'s rank has been updated to %arg-3%!"
 							send "&9Client Manager> &7%arg-2%'s rank will be reset to %{_or}%on their login!"
@@ -5145,7 +5163,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 						else if arg 3 is "HERO":
 							set {mineplex.testrank.%arg-2%} to {mineplex.rank.%arg-2%}
 							set {mineplex.rank.%arg-2%} to "&d&lHERO "
-							execute console command "/__mp__dp__ %arg-2%"
+							dropPerms(arg-2)
 							set {_or} to uncolored {mineplex.testrank.%arg-2%}
 							send "&9Client Manager> &7%arg-2%'s rank has been updated to %arg-3%!"
 							send "&9Client Manager> &7%arg-2%'s rank will be reset to %{_or}%on their login!"
@@ -5158,7 +5176,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 						else if arg 3 is "LEGEND":
 							set {mineplex.testrank.%arg-2%} to {mineplex.rank.%arg-2%}
 							set {mineplex.rank.%arg-2%} to "&a&lLEGEND "
-							execute console command "/__mp__dp__ %arg-2%"
+							dropPerms(arg-2)
 							set {_or} to uncolored {mineplex.testrank.%arg-2%}
 							send "&9Client Manager> &7%arg-2%'s rank has been updated to %arg-3%!"
 							send "&9Client Manager> &7%arg-2%'s rank will be reset to %{_or}%on their login!"
@@ -5171,7 +5189,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 						else if arg 3 is "TITAN":
 							set {mineplex.testrank.%arg-2%} to {mineplex.rank.%arg-2%}
 							set {mineplex.rank.%arg-2%} to "&c&lTITAN "
-							execute console command "/__mp__dp__ %arg-1%"
+							dropPerms(arg-2)
 							set {_or} to uncolored {mineplex.testrank.%arg-2%}
 							send "&9Client Manager> &7%arg-2%'s rank has been updated to %arg-3%!"
 							send "&9Client Manager> &7%arg-2%'s rank will be reset to %{_or}%on their login!"
@@ -5184,7 +5202,7 @@ command /rank [<string>] [<offline player>] [<string>]:
 						else if arg 3 is "ETERNAL":
 							set {mineplex.testrank.%arg-2%} to {mineplex.rank.%arg-2%}
 							set {mineplex.rank.%arg-2%} to "&3&lETERNAL "
-							execute console command "/__mp__dp__ %arg-2%"
+							dropPerms(arg-2)
 							set {_or} to uncolored {mineplex.testrank.%arg-2%}
 							send "&9Client Manager> &7%arg-2%'s rank has been updated to %arg-3%!"
 							send "&9Client Manager> &7%arg-2%'s rank will be reset to %{_or}%on their login!"
@@ -5286,24 +5304,6 @@ command /getadmin:
 				send "&9Admin Mode> &7%{_p}% Admin Mode: &aTrue"
 		else:
 			send "&9Admin Mode> &7/getadmin is only for JR.DEV!"
-
-command /__mp__dp__ <player>:
-	executable by: console
-	trigger:
-		remove "mineplex.trainee" from arg-1's permissions
-		remove "mineplex.legend" from arg-1's permissions
-		remove "mineplex.titan" from arg-1's permissions
-		remove "mineplex.mod" from arg-1's permissions
-		remove "mineplex.srmod" from arg-1's permissions
-		remove "mineplex.admin" from arg-1's permissions
-		remove "mineplex.leader" from arg-1's permissions
-		remove "mineplex.owner" from arg-1's permissions
-		remove "mineplex.jrdev" from arg-1's permissions
-		remove "mineplex.2fa" from arg-1's permissions
-		remove "mineplex.dev" from arg-1's permissions
-		remove "mineplex.twitch" from arg-1's permissions
-		remove "mineplex.youtube" from arg-1's permissions
-		remove "mineplex.builder" from arg-1's permissions
 
 function rawreport(arg1: player , arg2: player , arg3: text , arg4: text , arg5: text) :: string:
 	if {_arg3} is "Hacking":
