@@ -666,7 +666,6 @@ function configRefresh(n: number) :: number:
 	set {mineplex.config.twitter} to value "twitter" get of "plugins/Mineplex-Core-Remake/config.yml"
 	set {mineplex.config.shoplink} to value "shoplink" get of "plugins/Mineplex-Core-Remake/config.yml"
 	set {mineplex.config.world} to value "worldname" get of "plugins/Mineplex-Core-Remake/config.yml"
-	set {mineplex.config.doublejump} to value "doublejump" get of "plugins/Mineplex-Core-Remake/config.yml"
 	set {mineplex.config.autoop} to value "autoop" get of "plugins/Mineplex-Core-Remake/config.yml"
 	set {mineplex.config.unbanadmin} to value "unbanadmin" get of "plugins/Mineplex-Core-Remake/config.yml"
 
@@ -681,7 +680,6 @@ function configPopulate(n: number) :: number:
 	set "twitter" to "http://twitter.com/mineplex" in yaml file "plugins/Mineplex-Core-Remake/config.yml"
 	set "shoplink" to "www.mineplex.com/shop" in yaml file "plugins/Mineplex-Core-Remake/config.yml"
 	set "worldname" to "world" in yaml file "plugins/Mineplex-Core-Remake/config.yml"
-	set "doublejump" to "true" in yaml file "plugins/Mineplex-Core-Remake/config.yml"
 	set "autoop" to "false" in yaml file "plugins/Mineplex-Core-Remake/config.yml"
 	set "unbanadmin" to "false" in yaml file "plugins/Mineplex-Core-Remake/config.yml"
 
@@ -3472,37 +3470,6 @@ on join:
 	rankLoad(player, 1, 0)
 	loop all players:
 		updateRankAPI(loop-player)
-
-on flight toggle:
-	if {mineplex.config.doublejump} is "true":
-		if {doublejump.%uuid of player%} is set:
-			if player's gamemode is not creative:
-				cancel event
-				delete {doublejump.%uuid of player%}
-				wait 1 tick
-				set player's flight state to false
-				push player upward at speed 0.3
-				push player forward at speed 0.9
-				play raw sound "mob.ghast.fireball" at player with pitch 2 volume 0.99
-			else:
-				stop
-		else:
-			stop
-	else:
-		stop
-
-on jump:
-	if player's gamemode is not creative:
-		if {doublejump.%uuid of player%} is not set:
-			if block below player is not air or water:
-				set player's flight state to true
-				set {doublejump.%uuid of player%} to true
-			else:
-				stop
-		else:
-			stop
-	else:
-		stop
 
 on quit:
 	set {mineplex.rank.uuid.%uuid of player%} to {mineplex.rank.%player%}
