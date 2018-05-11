@@ -3467,15 +3467,6 @@ function rankLoad(p: player , n: number , t: number) :: string:
 			set {mineplex.hover.%{_p}%} to "&9&lARTIST%nl%&fThe Artist rank is given to talented artists%nl%who are endorsed to create content for Mineplex."
 			return "&9Artist"
 
-on death of player:
-	if attacker is a player:
-		if projectile is set:
-			set the death message to "&9Death> &e%victim% &7killed by &e%attacker% &7with &eArchery&7."
-	if attacker is not a player:
-		if attacker is set:
-			set {_dm} to 1st char in each word of "%attacker%" to caps
-			set the death message to "&9Death> &e%victim% &7killed by &e%{_dm}%&7."
-
 on join:
 	wait 2 ticks
 	rankLoad(player, 1, 0)
