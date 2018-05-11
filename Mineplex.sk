@@ -885,7 +885,6 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 			send "&4/Mineplex-Core News (True/False) &7Toggles whether the MCR News system is being used. &4Operator"
 			send "&4/Mineplex-Core Scoreboard (True/False) &7Toggles whether the MCR Scoreboard is being used. &4Operator"
 			send "&4/Mineplex-Core Carl &7Spawn Carl the Creeper in a fixed position at your current location. &4Operator"
-			send "&4/Mineplex-Core TNT (True/False) &7Toggles the Throwing TNT Mechanics to be true or false. &4Operator"
 			send "&4/Mineplex-Core purgehistory (player) &7Purges a player's punish history. &4Operator"
 			send "&4/Mineplex-Core ForcefieldOff (Player) &7Forces a player to toggle off thier forcefield. &4Operator"
 			send "&a"
@@ -898,7 +897,6 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 				send "&4/Mineplex-Core News (True/False) &7Toggles whether the MCR News system is being used. &4Operator"
 				send "&4/Mineplex-Core Scoreboard (True/False) &7Toggles whether the MCR Scoreboard is being used. &4Operator"
 				send "&4/Mineplex-Core Carl &7Spawn Carl the Creeper in a fixed position at your current location. &4Operator"
-				send "&4/Mineplex-Core TNT (True/False) &7Toggles the Throwing TNT Mechanics to be true or false. &4Operator"
 				send "&4/Mineplex-Core purgehistory (player) &7Purges a player's punish history. &4Operator"
 				send "&4/Mineplex-Core ForcefieldOff (Player) &7Forces a player to toggle off thier forcefield. &4Operator"
 				send "&a"
@@ -951,20 +949,6 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 						send "&4/Mineplex-Core News (True/False) &7Toggles whether the MCR News system is being used. &4Operator"
 				else:
 					send "&4/Mineplex-Core News (True/False) &7Toggles whether the MCR News system is being used. &4Operator"
-			else if arg-1 is "TNT":
-				if arg-2 is not set:
-					send "&4/Mineplex-Core TNT (True/False) &7Toggles the Throwing TNT Mechanics to be true or false. &4Operator"
-				else if arg-2 is set:
-					if arg-2 is "true":
-						set {mineplex.tntlauncher} to true
-						send "&9Core Settings> &7Now using the Throwing TNT Mechanics."
-					else if arg-2 is "false":
-						set {mineplex.tntlauncher} to false
-						send "&9Core Settings> &7No longer using the Throwing TNT Mechanics."
-					else:
-						send "&4/Mineplex-Core TNT (True/False) &7Toggles the Throwing TNT Mechanics to be true or false. &4Operator"
-				else:
-					send "&4/Mineplex-Core TNT (True/False) &7Toggles the Throwing TNT Mechanics to be true or false. &4Operator"
 			else if arg-1 is "purgehistory":
 				if arg 2 is not set:
 					send "&4/Mineplex-Core purgehistory (player) &7Purges a player's punish history. &4Operator"
@@ -1010,7 +994,6 @@ command /mineplex-core [<string>] [<string>] [<string>]:
 				send "&4/Mineplex-Core News (True/False) &7Toggles whether the MCR News system is being used. &4Operator"
 				send "&4/Mineplex-Core Scoreboard (True/False) &7Toggles whether the MCR Scoreboard is being used. &4Operator"
 				send "&4/Mineplex-Core Carl &7Spawn Carl the Creeper in a fixed position at your current location. &4Operator"
-				send "&4/Mineplex-Core TNT (True/False) &7Toggles the Throwing TNT Mechanics to be true or false. &4Operator"
 				send "&4/Mineplex-Core purgehistory (player) &7Purges a player's punish history. &4Operator"
 				send "&4/Mineplex-Core ForcefieldOff (Player) &7Forces a player to toggle off thier forcefield. &4Operator"
 				send "&a"
@@ -3601,8 +3584,6 @@ on join:
 			set {mineplex.report.id} to 1
 		if {mineplex.dj} is not set:
 			set {mineplex.dj} to true
-		if {mineplex.tntlauncher} is not set:
-			set {mineplex.tntlauncher} to true
 		if {poll.id.last} is not set:
 			set {poll.id.last} to 0
 		if {mineplex.ff.list::%player%} is set:
@@ -3642,8 +3623,6 @@ on load:
 		set {mineplex.report.id} to 1
 	if {mineplex.dj} is not set:
 		set {mineplex.dj} to true
-	if {mineplex.tntlauncher} is not set:
-		set {mineplex.tntlauncher} to true
 	if {poll.id.last} is not set:
 		set {poll.id.last} to 0
 
@@ -6831,26 +6810,6 @@ on damage of a player :
 	distance between {_loc} and {_loc2} = 0
 	victim's ping < 250
 	gwenAlert((victim), ("Velocity"))
-
-#Systems
-
-on leftclick holding tnt:
-	if {mineplex.tntlauncher} is true:
-		player has 1 tnt
-		spawn a primed tnt 1 meter above the player
-		add "{Fuse:60}" to nbt of the spawned entity
-		push the spawned entity in direction of player at speed 0.9
-		push the spawned entity upwards at speed 0.2
-		remove 1 tnt from player
-
-on rightclick holding tnt:
-	if {mineplex.tntlauncher} is true:
-		player has 1 tnt
-		spawn a primed tnt 1 meter above the player
-		add "{Fuse:60}" to nbt of the spawned entity
-		push the spawned entity in direction of player at speed 0.9
-		push the spawned entity upwards at speed 0.2
-		remove 1 tnt from player
 
 #Modules
 
