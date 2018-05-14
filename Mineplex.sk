@@ -4083,7 +4083,9 @@ command /getadmin:
 		else:
 			send "&9Admin Mode> &7/getadmin is only for JR.DEV!"
 
-function rawreport(arg1: player , arg2: player , arg3: text , arg4: text , arg5: text) :: string:
+function rawreport(arg1: offline player , arg2: offline player , arg3: text , arg4: text , arg5: text) :: string:
+	if {mineplex.report.id} is not set:
+		set {mineplex.report.id} to 0
 	if {_arg3} is "Hacking":
 		set {mineplex.report.player.%{mineplex.report.id}%} to {_arg1}
 		set {mineplex.report.reporter.%{mineplex.report.id}%} to {_arg2}
