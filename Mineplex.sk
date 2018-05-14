@@ -2892,6 +2892,9 @@ command /give [<string>] [<string>] [<string>] [<string>] [<string>]:
 									enchant {_i} with "%{_e}%" parsed as a enchantment type
 								else:
 									send "&9Give> &7Invalid Enchantment [&6%{_oe}%&7]."
+							if {_a} > 64:
+								send "&9Give> &7Invalid Amount [%{_a}%]. Defaulting to [64]."
+								set {_a} to 64
 							send "&9Give> &7You gave &e%{_a}% %{_i}% &7to &eALL&7."
 							send "&9Give> &7You received &e%{_a}% %{_i}% &7from &e%player%&7." to all players
 							loop all players:
@@ -2925,6 +2928,9 @@ command /give [<string>] [<string>] [<string>] [<string>] [<string>]:
 										enchant {_i} with "%{_e}%" parsed as a enchantment type
 									else:
 										send "&9Give> &7Invalid Enchantment [&6%{_oe}%&7]."
+								if {_a} > 64:
+									send "&9Give> &7Invalid Amount [%{_a}%]. Defaulting to [64]."
+									set {_a} to 64
 								send "&9Give> &7You gave &e%{_a}% %{_i}% &7to &e%{_p}%&7."
 								send "&9Give> &7You received &e%{_a}% %{_i}% &7from &e%player%&7." to {_p}
 								loop {_a} times:
