@@ -502,7 +502,7 @@ function getPlayerdata(p: offline player , f: text) :: string:
 		return {_get}
 	else if {mineplex.mode} is "sql":
 		set {_get} to first element out of objects in column "%{_f}%" from result of query "SELECT %{_f}% FROM `accounts` WHERE uuid = '%{_uuid}%'"
-		return {_get}
+		return "%{_get}%"
 
 function setPlayerdata(p: offline player , f: text , v: text) :: boolean:
 	set {_uuid} to uuid of {_p}
@@ -705,10 +705,13 @@ function updateRankAPI(p: player) :: player:
 	if {mineplex.rank.%{_p}%} is not set:
 		set {mineplex.rank.%{_p}%} to ""
 	if {mineplex.disguise.%{_p}%} is set:
+		set {_disguiseTemp} to getPlayerdata({mineplex.disguise.%{_p}%}, "rank")
+		if {_disguiseTemp} is not set:
+			set {_disguiseTemp} to ""
 		set {_br} to uncolored {mineplex.rank.%{_p}%}
-		set {_dr} to uncolored {mineplex.rank.%{mineplex.disguise.%{_p}%}%}
-		if {mineplex.rank.%{mineplex.disguise.%{_p}%}%} is set:
-			make all players see {_p}'s prefix as "%{mineplex.rank.%{mineplex.disguise.%{_p}%}%}%&r&e"
+		set {_dr} to uncolored {_disguiseTemp}
+		if {_disguiseTemp} is set:
+			make all players see {_p}'s prefix as "%{_disguiseTemp}%&r&e"
 		else:
 			make all players see {_p}'s prefix as "&e"
 		set {_br} to convert string "%{_br}%" to lowercase
@@ -741,9 +744,6 @@ function updateRankAPI(p: player) :: player:
 			replace all "mod" with "Mod" in {_br}
 		if {_br} contains "tube":
 			replace all "tube" with "Tube" in {_br}
-		loop {mineplex.patreon::*}:
-			if loop-value is "%{_p}%":
-				set {_br} to "P.%{_br}%"
 		set {mineplex.api.displayrank.%{_p}%} to "%{_dr}% (%{_br}%)"
 		set {mineplex.api.displayname.%{_p}%} to "%{mineplex.disguise.%{_p}%}%"
 		set {mineplex.sb.anim.%{_p}%} to "              Welcome %{mineplex.api.displayname.%{_p}%}%, to the %{mineplex.config.servername}% Network!                    "
@@ -776,6 +776,22 @@ function updateRankAPI(p: player) :: player:
 		set {mineplex.api.displayname.%{_p}%} to "%{_p}%"
 		set {mineplex.sb.anim.%{_p}%} to "              Welcome %{mineplex.api.displayname.%{_p}%}%, to the %{mineplex.config.servername}% Network!                    "
 
+function parseLevel(lvl: number) :: string:
+	if {_lvl} is less than 0:
+		return "&d%{_lvl}%"
+	else if {_lvl} is less than 20:
+		return "&7%{_lvl}%"
+	else if {_lvl} is less than 40:
+		return "&9%{_lvl}%"
+	else if {_lvl} is less than 60:
+		return "&2%{_lvl}%"
+	else if {_lvl} is less than 80:
+		return "&6%{_lvl}%"
+	else if {_lvl} is less than or equal to 100:
+		return "&c%{_lvl}%"
+	else if {_lvl} is greater than 100:
+		return "&c%{_lvl}%"
+
 function mcs(p: player , m: text) :: number:
 	if {mineplex.overridechat} is true:
 		if {mineplex.disguise.%{_p}%} is set:
@@ -784,12 +800,16 @@ function mcs(p: player , m: text) :: number:
 			set {_player} to {_p}
 		set {_prerank} to getPlayerdata({_player}, "rank")
 		set {_rank} to parseRankRaw({_prerank})
+		set {_prelevel} to getPlayerdata({_player}, "level")
+		set {_lvl} to parseLevel({_prelevel} parsed as a number)
 		if {_rank} is not set:
 			set {_rank} to ""
 		if {_rank} is "null":
 			set {_rank} to ""
-		if {mineplex.level.%{_player}%} is not set:
-			set {mineplex.level.%{_player}%} to "&70"
+		if {_lvl} is not set:
+			set {_lvl} to parseLevel(0)
+		if {_player} is "WheezyGold7931":
+			set {_lvl} to parseLevel(101)
 		replace all " fuck " with " **** " in {_m}
 		replace all " bitch " with " ***** " in {_m}
 		replace all " ass " with " *** " in {_m}
@@ -808,25 +828,16 @@ function mcs(p: player , m: text) :: number:
 		set {mineplex.lastsent.%{_p}%} to {_m}
 		loop all players:
 			if {mineplex.pref.pc.%loop-player%} is true:
-				if {mineplex.rank.%{_player}%} is set:
-					set {_lvl} to {mineplex.level.%{_player}%}
-					if {_player} is "WheezyGold7931":
-						set {_lvl} to "&c101"
-					loop {mineplex.ignorelist.%loop-player%::*}:
-						if loop-value-2 is "%{_player}%":
-							set {_ignore.%loop-player-1%} to true
-					if {_ignore.%loop-player-1%} is not set:
-						if {mineplex.rank.%{_player}%} is not "":
-							set {_sanitizedm} to uncolored {_m}
-							loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-								if loop-value-2 is {_player}:
-									set {_brank} to uncolored {mineplex.rank.%{_player}%}
-									set {_rank} to "&6&lP.%{_brank}%"
-								else:
-									set {_rank} to {mineplex.rank.%{_player}%}
-							mcrjson("%loop-player%", "%{_lvl}%|| %{_rank}%||ttp:%{mineplex.hover.%{_player}%}%||&e%{_player}% &f%{_sanitizedm}%", false)
-						else:
-							send "%{_lvl}% %{mineplex.rank.%{_player}%}%&e%{_player}% &f%{_m}%" to loop-player
+				loop {mineplex.ignorelist.%loop-player%::*}:
+					if loop-value-2 is "%{_player}%":
+						set {_ignore.%loop-player-1%} to true
+				if {_ignore.%loop-player-1%} is not set:
+					if {_rank} is not "":
+						
+						set {_sanitizedm} to uncolored {_m}
+						mcrjson("%loop-player%", "%{_lvl}%|| %{_rank}%||ttp:%{mineplex.hover.%{_player}%}%||&e%{_player}% &f%{_sanitizedm}%", false)
+					else:
+						send "%{_lvl}% &e%{_player}% &f%{_m}%" to loop-player
 		return -1
 	else:
 		stop
@@ -1883,7 +1894,7 @@ function animSB(p: player) :: text:
 on join:
 	if {mineplex.usescoreboard} is false:
 		stop
-	set {mineplex.sb.anim.%player%} to "              Welcome %player%, to the %{mineplex.config.servername}% Network!                    "
+	set {mineplex.sb.anim.%player%} to "              Welcome %player%, to the  %{mineplex.config.servername}% Network!                    "
 	animSB(player)
 
 #every 2 seconds:
@@ -1912,7 +1923,7 @@ on join:
 
 #Rank Loader
 
-function rankLoad(p: player , n: number , t: number) :: string:
+function rankLoad(p: offline player , n: number , t: number) :: string:
 	if {_n} is 1:
 		if {mineplex.testrank.%{_p}%} is set:
 			if {_t} is 0:
@@ -1956,11 +1967,6 @@ function rankLoad(p: player , n: number , t: number) :: string:
 			return "&cTitan"
 		if {mineplex.rank.%{_p}%} is "&6&lTRAINEE ":
 			execute console command "/rank set %{_p}% TRAINEE"
-			loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-				if loop-value is {_p}:
-					set {_p} tab name to "&6&lP.TRAINEE &e%{_p}%"
-				else:
-					set {_p} tab name to "&6&lTRAINEE &e%{_p}%"
 			set {_p} tab name to "&6&lTRAINEE &e%{_p}%"
 			set {mineplex.displaya.%{_p}%} to "&6Trainee"
 			set {mineplex.colora.%{_p}%} to "§6"
@@ -1968,22 +1974,14 @@ function rankLoad(p: player , n: number , t: number) :: string:
 			return "&6Trainee"
 		if {mineplex.rank.%{_p}%} is "&6&lMOD ":
 			execute console command "/rank set %{_p}% MODERATOR"
-			loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-				if loop-value is {_p}:
-					set {_p} tab name to "&6&lP.MOD &e%{_p}%"
-				else:
-					set {_p} tab name to "&6&lMOD &e%{_p}%"
+			set {_p} tab name to "&6&lMOD &e%{_p}%"
 			set {mineplex.displaya.%{_p}%} to "&6Mod"
 			set {mineplex.colora.%{_p}%} to "§6"
 			set {mineplex.hover.%{_p}%} to "&6&lMOD%nl%&fModerators enforce rules and provide help to%nl%&fanyone with questions or concerns.%nl% %nl%&fFor assistance, contact them using &e/a <message>&f."
 			return "&6Mod"
 		if {mineplex.rank.%{_p}%} is "&6&lSR.MOD ":
 			execute console command "/rank set %{_p}% SNR_MODERATOR"
-			loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-				if loop-value is {_p}:
-					set {_p} tab name to "&6&lP.SR.MOD &e%{_p}%"
-				else:
-					set {_p} tab name to "&6&lSR.MOD &e%{_p}%"
+			set {_p} tab name to "&6&lSR.MOD &e%{_p}%"
 			set {mineplex.displaya.%{_p}%} to "&6Sr.Mod"
 			set {mineplex.colora.%{_p}%} to "§6"
 			set {mineplex.hover.%{_p}%} to "&6&lSR.MOD%nl%&fSenior Moderators are members of a special%nl%&fSenior Moderators team where they have to fulfull specific tasks.%nl%&fJust like Moderators, you can always ask them for help.%nl% %nl%&fFor assistance, contact them using &e/a <message>&f."
@@ -1997,11 +1995,7 @@ function rankLoad(p: player , n: number , t: number) :: string:
 			return "&6C.Mod"
 		if {mineplex.rank.%{_p}%} is "&4&lADMIN ":
 			execute console command "/rank set %{_p}% ADMIN"
-			loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-				if loop-value is {_p}:
-					set {_p} tab name to "&6&lP.ADMIN &e%{_p}%"
-				else:
-					set {_p} tab name to "&4&lADMIN &e%{_p}%"
+			set {_p} tab name to "&4&lADMIN &e%{_p}%"
 			set {mineplex.displaya.%{_p}%} to "&4Admin"
 			set {mineplex.colora.%{_p}%} to "§4"
 			set {mineplex.hover.%{_p}%} to "&4&lADMIN%nl%&fAn Administrator's role is to manage%nl%&ftheir respective Senoir Moderator team%nl%&fand all moderators within it."
@@ -2015,22 +2009,14 @@ function rankLoad(p: player , n: number , t: number) :: string:
 			return "&9Apex"
 		if {mineplex.rank.%{_p}%} is "&4&lLEADER ":
 			execute console command "/rank set %{_p}% LEADER"
-			loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-				if loop-value is {_p}:
-					set {_p} tab name to "&6&lP.LEADER &e%{_p}%"
-				else:
-					set {_p} tab name to "&4&lLEADER &e%{_p}%"
+			set {_p} tab name to "&4&lLEADER &e%{_p}%"
 			set {mineplex.displaya.%{_p}%} to "&4Leader"
 			set {mineplex.colora.%{_p}%} to "§4"
 			set {mineplex.hover.%{_p}%} to "&4&lLEADER%nl%&fLeaders manage the operation of their respective team%nl%&for projects. They usually operate on affairs within%nl%&fthe staff, development, or management team."
 			return "&4Leader"
 		if {mineplex.rank.%{_p}%} is "&4&lOWNER ":
 			execute console command "/rank set %{_p}% OWNER"
-			loop {mineplex.patreon::*}: #Do not worry about this. It only has to do with my test server, not you guys <3
-				if loop-value is {_p}:
-					set {_p} tab name to "&6&lP.OWNER &e%{_p}%"
-				else:
-					set {_p} tab name to "&4&lOWNER &e%{_p}%"
+			set {_p} tab name to "&4&lOWNER &e%{_p}%"
 			set {mineplex.displaya.%{_p}%} to "&4Owner"
 			set {mineplex.colora.%{_p}%} to "§4"
 			set {mineplex.hover.%{_p}%} to "&4&lOWNER%nl%&fOwners are the founders of Mineplex.%nl%&fEach owner manages a different aspect of the%nl%server and ensures its efficient operation."
@@ -2840,7 +2826,10 @@ command /disguise [<string>] [<string>]:
 						send "&9Disguise> &7You may not disguise as users who are staff, youtubers, or twitchers."
 						stop
 				send "&9Disguise> &7Disguise Active: &f%arg-1%"
-				set {_localp} to arg 1 parsed as a player
+				set {_localp} to arg 1 parsed as an offline player
+				set {_prerank} to getPlayerdata({_localp}, "rank")
+				set {_rank} to parseRankRaw({_prerank})
+				set {mineplex.rank.%{_localp}%} to {_rank}
 				rankLoad({_localp} , 2, 1)
 				if {mineplex.level.%arg-1%} is not set:
 					set {mineplex.level.%arg-1%} to "&70"
@@ -2982,7 +2971,7 @@ command /give [<string>] [<string>] [<string>] [<string>] [<string>]:
 					else:
 						send "&9Item Search> &e0 &7matches for [&e%arg-2%&7]."
 						send "&9Item(s) Search> &7Invalid [&e%arg-2%&7]."
-		
+
 #/givestat player stat amount
 command /givestat [<offline player>] [<string>] [<string>] [<string>]:
 	permission: mineplex.support
@@ -2998,33 +2987,31 @@ command /givestat [<offline player>] [<string>] [<string>] [<string>]:
 						if {_lvl} is less than 0:
 							send "&9Stats> &7Unknown value for &eGlobal.ExpEarned&7!"
 							stop
+						else if {_lvl} is greater than 100:
+							send "&9Stats> &7Unknown value for &eGlobal.ExpEarned&7!"
+							stop
 						else if {_lvl} is less than 20:
-							set {_temp} to "&7%{_lvl}%"
-							set {mineplex.level.%arg-1%} to "%{_temp}%"
+							set {mineplex.level.%arg-1%} to parseLevel({_lvl})
 							send "&9Stats> &7Applied &e%{_lvl}% Global.ExpEarned &7to &e%arg-1%&7."
 							setPlayerdata(arg-1, "level", "%{_lvl}%")
 							stop
 						else if {_lvl} is less than 40:
-							set {_temp} to "&9%{_lvl}%"
-							set {mineplex.level.%arg-1%} to "%{_temp}%"
+							set {mineplex.level.%arg-1%} to parseLevel({_lvl})
 							send "&9Stats> &7Applied &e%{_lvl}% Global.ExpEarned &7to &e%arg-1%&7."
 							setPlayerdata(arg-1, "level", "%{_lvl}%")
 							stop
 						else if {_lvl} is less than 60:
-							set {_temp} to "&2%{_lvl}%"
-							set {mineplex.level.%arg-1%} to "%{_temp}%"
+							set {mineplex.level.%arg-1%} to parseLevel({_lvl})
 							send "&9Stats> &7Applied &e%{_lvl}% Global.ExpEarned &7to &e%arg-1%&7."
 							setPlayerdata(arg-1, "level", "%{_lvl}%")
 							stop
 						else if {_lvl} is less than 80:
-							set {_temp} to "&6%{_lvl}%"
-							set {mineplex.level.%arg-1%} to "%{_temp}%"
+							set {mineplex.level.%arg-1%} to parseLevel({_lvl})
 							send "&9Stats> &7Applied &e%{_lvl}% Global.ExpEarned &7to &e%arg-1%&7."
 							setPlayerdata(arg-1, "level", "%{_lvl}%")
 							stop
 						else if {_lvl} is less than or equal to 100:
-							set {_temp} to "&c%{_lvl}%"
-							set {mineplex.level.%arg-1%} to "%{_temp}%"
+							set {mineplex.level.%arg-1%} to parseLevel({_lvl})
 							send "&9Stats> &7Applied &e%{_lvl}% Global.ExpEarned &7to &e%arg-1%&7."
 							setPlayerdata(arg-1, "level", "%{_lvl}%")
 							stop
@@ -3063,6 +3050,8 @@ command /givestat [<offline player>] [<string>] [<string>] [<string>]:
 						add {_num} to {_cur}
 						setPlayerdata(arg-1, "stats.global.chests", "%{_cur}%")
 						send "&9Stats> &7Applied &e%{_num}% Global.ChestsOpened &7to &e%arg-1%&7."
+					else:
+						send "&9Stats> &e/givestat (player) (stat) (amount)"
 				else:
 					send "&9Stats> &e/givestat (player) (stat) (amount)"
 			else:
