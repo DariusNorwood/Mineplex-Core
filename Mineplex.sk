@@ -3384,11 +3384,10 @@ command /chatslow [<integer>]:
 			else:
 				if {mineplex.chatslow} is not set:
 					set {mineplex.chatslow} to "%arg-2% seconds" parsed as timespan
-					send "&9Chat> &6%{_p}% &7has set the chat delay to &6%arg-1%&7 seconds." to all players
+					send "&9Chat> &7Chat slow has been &aenabled &7with a cooldown of &a%arg-2% seconds&7." to all players
 				else:
 					set {mineplex.chatslow} to "%arg-2% seconds" parsed as timespan
-					send "&9Chat> &6%{_p}% &7has enabled chat slow." to all players
-					send "&9Chat> &6%{_p}% &7has set the chat delay to &6%arg-1%&7 seconds." to all players
+					send "&9Chat> &7Chat slow has been &aenabled &7with a cooldown of &a%arg-2% seconds&7." to all players
 		else:
 			if {mineplex.chatsilence} is set:
 				send "&9Chat> &7Chat is in silence mode. Disable silence mode to activate slow chat."
@@ -3396,12 +3395,11 @@ command /chatslow [<integer>]:
 			else:
 				if {mineplex.chatslow} is set:
 					delete {mineplex.chatslow}
-					send "&9Chat> &6%{_p}% &7has disabled chat slow." to all players
+					send "&9Chat> &7Chat slow has been &cdisabled&7." to all players
 				else:
 					send "&9Message> &cYou didn't enter a time limit! Defaulting to 10 seconds."
 					set {mineplex.chatslow} to "10 seconds" parsed as timespan
-					send "&9Chat> &6%{_p}% &7has enabled chat slow." to all players
-					send "&9Chat> &6%{_p}% &7has set the chat delay to &610 &7seconds." to all players
+					send "&9Chat> &7Chat slow has been &aenabled &7with a cooldown of &a10 seconds&7." to all players
 command /silence:
 	permission: mineplex.admin
 	permission message: &9Permissions> &7You do not have permission to do that.
